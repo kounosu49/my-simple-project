@@ -16,3 +16,9 @@ p {
     color: #666;
     line-height: 1.6;
 }
+
+/* 追加のスタイル - このファイルは保護されていない */
+.highlight {
+    background-color: yellow;
+    padding: 2px 4px;
+}
