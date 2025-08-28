@@ -1,9 +1,10 @@
-name: Protect index.html
+name: Protect index files
 
 on:
   pull_request:
     paths:
       - 'index.html'
+      - 'index.php'
 
 jobs:
   check-index-changes:
@@ -11,16 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: index.html変更チェック
+      - name: indexファイル変更チェック
         run: |
-          echo "index.htmlの変更を確認中..."
+          echo "indexファイルの変更を確認中..."
           
-          # 許可されたユーザー/ボットのリスト
-          ALLOWED_USERS=("kounosu49" "cms-bot" "github-actions[bot]")
+          # 許可されたユーザー/ボットのリスト（kounosu49を除外してテスト）
+          ALLOWED_USERS=("cms-bot" "github-actions[bot]")
           CURRENT_USER="${{ github.actor }}"
           
-          if git diff --name-only origin/main..HEAD | grep -q "^index.html$"; then
-            echo "⚠️  index.htmlの変更を検出しました - 実行者: $CURRENT_USER"
+          if git diff --name-only origin/main..HEAD | grep -E "^index\.(html|php)$"; then
+            echo "⚠️  indexファイルの変更を検出しました - 実行者: $CURRENT_USER"
             
             # 許可リストのユーザーかチェック
             IS_ALLOWED=false
@@ -39,13 +40,13 @@ jobs:
             fi
             
             if [ "$IS_ALLOWED" = true ]; then
-              echo "✅ 承認済み: $CURRENT_USER はindex.htmlを変更できます"
+              echo "✅ 承認済み: $CURRENT_USER はindexファイルを変更できます"
             else
-              echo "❌ 権限エラー: 許可されたユーザー/CMSのみがindex.htmlを変更できます"
+              echo "❌ 権限エラー: 許可されたユーザー/CMSのみがindexファイルを変更できます"
               echo "許可されたユーザー: ${ALLOWED_USERS[*]}"
               echo "CMS更新の場合は、PRタイトルに[CMS]を含めてください"
               exit 1
             fi
           else
-            echo "✅ index.htmlの変更はありません"
+            echo "✅ indexファイルの変更はありません"
           fi
