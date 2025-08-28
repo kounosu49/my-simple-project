@@ -1,0 +1,23 @@
+#!/bin/sh
+# Pre-commit hook to prevent index.html changes by non-owners
+
+# Get the current user from git config
+CURRENT_USER=$(git config user.name)
+ALLOWED_USER="kounosu49"
+
+# Check if index.html is being modified
+if git diff --cached --name-only | grep -q "^index.html$"; then
+    echo "⚠️  Attempting to modify index.html"
+    
+    # Check if current user is allowed
+    if [ "$CURRENT_USER" != "$ALLOWED_USER" ]; then
+        echo "❌ Error: Only $ALLOWED_USER can modify index.html"
+        echo "Your username: $CURRENT_USER"
+        echo "Please contact the repository owner for index.html changes."
+        exit 1
+    else
+        echo "✅ Authorized: $CURRENT_USER can modify index.html"
+    fi
+fi
+
+exit 0

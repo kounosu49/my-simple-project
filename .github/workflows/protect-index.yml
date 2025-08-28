@@ -1,0 +1,31 @@
+name: Protect index.html
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+
+jobs:
+  check-index-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check index.html changes
+        run: |
+          echo "Checking if index.html was modified..."
+          if git diff --name-only origin/main..HEAD | grep -q "^index.html$"; then
+            echo "⚠️  index.html changes detected"
+            echo "Only repository owner (@kounosu49) can modify index.html"
+            echo "Please request review from @kounosu49"
+            
+            # Check if PR author is the owner
+            if [ "${{ github.actor }}" != "kounosu49" ]; then
+              echo "❌ Unauthorized: Only @kounosu49 can modify index.html"
+              exit 1
+            else
+              echo "✅ Authorized: Owner is making changes"
+            fi
+          else
+            echo "✅ No index.html changes detected"
+          fi

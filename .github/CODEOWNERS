@@ -1,0 +1,4 @@
+# Code Owners for index.html protection
+# Only @kounosu49 can approve changes to index.html
+
+/index.html @kounosu49
