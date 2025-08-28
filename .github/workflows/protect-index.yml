@@ -11,21 +11,41 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Check index.html changes
+      - name: index.html変更チェック
         run: |
-          echo "Checking if index.html was modified..."
+          echo "index.htmlの変更を確認中..."
+          
+          # 許可されたユーザー/ボットのリスト
+          ALLOWED_USERS=("kounosu49" "cms-bot" "github-actions[bot]")
+          CURRENT_USER="${{ github.actor }}"
+          
           if git diff --name-only origin/main..HEAD | grep -q "^index.html$"; then
-            echo "⚠️  index.html changes detected"
-            echo "Only repository owner (@kounosu49) can modify index.html"
-            echo "Please request review from @kounosu49"
+            echo "⚠️  index.htmlの変更を検出しました - 実行者: $CURRENT_USER"
             
-            # Check if PR author is the owner
-            if [ "${{ github.actor }}" != "kounosu49" ]; then
-              echo "❌ Unauthorized: Only @kounosu49 can modify index.html"
-              exit 1
+            # 許可リストのユーザーかチェック
+            IS_ALLOWED=false
+            for user in "${ALLOWED_USERS[@]}"; do
+              if [ "$CURRENT_USER" = "$user" ]; then
+                IS_ALLOWED=true
+                break
+              fi
+            done
+            
+            # CMS経由の更新かチェック（PRタイトルで判定）
+            if [[ "${{ github.event.pull_request.title }}" == *"[CMS]"* ]] || 
+               [[ "${{ github.event.pull_request.title }}" == *"cms-update"* ]]; then
+              echo "✅ CMS経由の更新を検出 - 変更を許可します"
+              exit 0
+            fi
+            
+            if [ "$IS_ALLOWED" = true ]; then
+              echo "✅ 承認済み: $CURRENT_USER はindex.htmlを変更できます"
             else
-              echo "✅ Authorized: Owner is making changes"
+              echo "❌ 権限エラー: 許可されたユーザー/CMSのみがindex.htmlを変更できます"
+              echo "許可されたユーザー: ${ALLOWED_USERS[*]}"
+              echo "CMS更新の場合は、PRタイトルに[CMS]を含めてください"
+              exit 1
             fi
           else
-            echo "✅ No index.html changes detected"
+            echo "✅ index.htmlの変更はありません"
           fi
