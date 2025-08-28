@@ -13,6 +13,7 @@ header('Content-Type: text/html; charset=UTF-8');
 <body>
     <h1>Welcome to My Simple Project (PHP)</h1>
     <p>このファイルはCMS管理下のPHPファイルです。</p>
+    <p>テスト: この変更はエラーになるはずです。</p>
     <p>現在時刻: <?php echo date('Y-m-d H:i:s'); ?></p>
 </body>
 </html>
